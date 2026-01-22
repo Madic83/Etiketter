@@ -492,12 +492,12 @@ body {
     }
 
     .label {
-        border: 1px solid #ccc;
+        border: none !important;
         page-break-inside: avoid;
     }
 
     .label.selected {
-        border-color: #ccc;
+        border: none !important;
         background: white;
         box-shadow: none;
     }
