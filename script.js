@@ -21,6 +21,8 @@ class LabelEditor {
         this.clickedLabel = null;
         this.hasDragged = false;
         this.hasStartedDrag = false;
+        this.gridListenersAdded = false;
+        this.suppressNextClickDeselect = false;
         
         this.initializeLabels();
         this.setupEventListeners();
@@ -96,6 +98,10 @@ class LabelEditor {
 
         // Click outside elements to deselect element highlight
         document.addEventListener('click', (e) => {
+            if (this.suppressNextClickDeselect) {
+                this.suppressNextClickDeselect = false;
+                return;
+            }
             // Allow clicks inside control panel/inputs/textareas without deselecting
             if (e.target.closest('.control-panel')) return;
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
@@ -296,31 +302,44 @@ class LabelEditor {
     }
 
     pasteLabel() {
-        if (!this.selectedLabel) {
-            alert('Välj en etikett att klistra in i');
-            return;
-        }
         if (!this.copiedLabel) {
             alert('Ingen etikett är kopierad ännu');
             return;
         }
 
-        // Deep copy so we do not mutate the stored copy
-        const clone = JSON.parse(JSON.stringify(this.copiedLabel));
+        const targetIds = this.selectedLabels.size > 0
+            ? Array.from(this.selectedLabels)
+            : (this.selectedLabel ? [this.selectedLabel.id] : []);
 
-        // Assign new ids to elements to keep uniqueness
-        const baseId = Date.now();
-        clone.elements = clone.elements.map((el, idx) => ({
-            ...el,
-            id: baseId + idx
-        }));
+        if (targetIds.length === 0) {
+            alert('Välj minst en etikett att klistra in i');
+            return;
+        }
 
-        this.selectedLabel.elements = clone.elements;
-        this.selectedLabel.backgroundColor = clone.backgroundColor;
+        targetIds.forEach((labelId, idx) => {
+            const targetLabel = this.labels.find(l => l.id === labelId);
+            if (!targetLabel) return;
+
+            const clone = JSON.parse(JSON.stringify(this.copiedLabel));
+            const baseId = Date.now() + labelId * 1000 + idx * 100;
+            clone.elements = clone.elements.map((el, elIdx) => ({
+                ...el,
+                id: baseId + elIdx
+            }));
+
+            targetLabel.elements = clone.elements;
+            targetLabel.backgroundColor = clone.backgroundColor;
+            this.renderLabel(targetLabel);
+        });
+
+        const lastId = targetIds[targetIds.length - 1];
+        this.selectedLabel = this.labels.find(l => l.id === lastId) || this.selectedLabel;
         this.selectedElement = null;
-
-        this.renderLabel(this.selectedLabel);
         this.updatePropertyPanel();
+
+        if (targetIds.length > 1) {
+            alert(`Innehåll klistrat in i ${targetIds.length} etiketter`);
+        }
     }
 
     selectLabel(labelElement, labelData, addToSelection = false) {
@@ -612,6 +631,30 @@ class LabelEditor {
             this.renderLabel(labelData);
         });
 
+        // Allow drag-selection starting on empty grid space
+        if (!this.gridListenersAdded) {
+            grid.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.label')) return; // handled by label listener
+
+                const isMultiSelect = e.ctrlKey || e.metaKey;
+                this.clickedLabel = null;
+                this.isSelecting = true;
+                this.selectionStartX = e.clientX;
+                this.selectionStartY = e.clientY;
+                this.hasDragged = false;
+                this.hasStartedDrag = false;
+
+                if (!isMultiSelect) {
+                    document.querySelectorAll('.label').forEach(el => el.classList.remove('selected'));
+                    this.selectedLabels.clear();
+                    this.updateSelectionInfo();
+                }
+
+                e.preventDefault();
+            });
+            this.gridListenersAdded = true;
+        }
+
         // Add global mouse move/up listeners
         document.addEventListener('mousemove', (e) => this.onMouseMove(e));
         document.addEventListener('mouseup', (e) => this.onMouseUp(e));
@@ -785,6 +828,7 @@ class LabelEditor {
                     const lastSelectedId = Array.from(this.selectedLabels).pop();
                     this.selectedLabel = this.labels.find(l => l.id === lastSelectedId);
                 }
+                this.suppressNextClickDeselect = true;
             }
             
             this.clickedLabel = null;
