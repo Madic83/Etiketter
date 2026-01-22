@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>A4 Label Editor - 24 Name Tags</title>
+    <link rel="stylesheet" href="styles.css?v13">
+</head>
+<body>
+    <div class="container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <h1>A4 Label Editor</h1>
+            <div class="toolbar-buttons">
+                <button id="addTextBtn" class="btn btn-primary" title="Add text to selected label">
+                    <span>+ Text</span>
+                </button>
+                <button id="addImageBtn" class="btn btn-primary" title="Add image to selected label">
+                    <span>+ Image</span>
+                </button>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <button id="deleteBtn" class="btn btn-danger" title="Delete selected element">
+                    Delete
+                </button>
+                <div class="divider"></div>
+                <button id="printBtn" class="btn btn-success" title="Print A4 sheet">
+                    <span>🖨️ Print</span>
+                </button>
+                <button id="downloadBtn" class="btn btn-info" title="Download as JSON">
+                    <span>💾 Save</span>
+                </button>
+                <button id="uploadBtn" class="btn btn-info" title="Load from JSON">
+                    <span>📂 Load</span>
+                </button>
+                <input type="file" id="loadInput" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h3>Properties</h3>
+                
+                <div class="property-section">
+                    <label>Text Content</label>
+                    <textarea id="textContent" placeholder="Enter text..." rows="3"></textarea>
+                </div>
+
+                <div class="property-section">
+                    <label>Font Family</label>
+                    <select id="fontFamily">
+                        <option value="Aptos">Aptos</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Bookman Old Style">Bookman Old Style</option>
+                        <option value="Calibri">Calibri</option>
+                        <option value="Century">Century</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Consolas">Consolas</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Lucida Console">Lucida Console</option>
+                        <option value="Palatino Linotype">Palatino Linotype</option>
+                        <option value="Segoe UI">Segoe UI</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                </div>
+
+                <div class="property-section">
+                    <label>Font Size</label>
+                    <div class="input-group">
+                        <input type="range" id="fontSize" min="8" max="72" value="16">
+                        <input type="number" id="fontSizeNumber" min="8" max="72" value="16">
+                        <span>px</span>
+                    </div>
+                </div>
+
+                <div class="property-section">
+                    <label>Font Color</label>
+                    <input type="color" id="textColor" value="#000000">
+                </div>
+
+                <div class="property-section">
+                    <label>Text Align</label>
+                    <div class="button-group">
+                        <button class="align-btn" data-align="left" title="Align Left">L</button>
+                        <button class="align-btn" data-align="center" title="Align Center">C</button>
+                        <button class="align-btn" data-align="right" title="Align Right">R</button>
+                    </div>
+                </div>
+
+                <div class="property-section">
+                    <label>
+                        <input type="checkbox" id="boldText"> Bold
+                    </label>
+                    <label>
+                        <input type="checkbox" id="italicText"> Italic
+                    </label>
+                    <label>
+                        <input type="checkbox" id="underlineText"> Underline
+                    </label>
+                </div>
+
+                <div class="property-section">
+                    <label>Background Color</label>
+                    <input type="color" id="backgroundColor" value="#ffffff">
+                </div>
+
+                <div class="property-section">
+                    <label>Image Opacity</label>
+                    <div class="input-group">
+                        <input type="range" id="imageOpacity" min="0" max="100" value="100">
+                        <input type="number" id="imageOpacityNumber" min="0" max="100" value="100">
+                        <span>%</span>
+                    </div>
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div class="property-section" style="display: flex; gap: 8px;">
+                    <button id="copyLabelBtn" class="btn btn-secondary" style="flex: 1;">Kopiera etikett</button>
+                    <button id="pasteLabelBtn" class="btn btn-secondary" style="flex: 1;">Klistra in etikett</button>
+                </div>
+
+                <div class="property-section">
+                    <button id="copyToSelectedBtn" class="btn btn-secondary" style="width: 100%;">
+                        Kopiera till markerade
+                    </button>
+                </div>
+
+                <div id="selectionInfo" style="display: none; padding: 8px; background: #e8f4f8; border-radius: 4px; margin-bottom: 10px; text-align: center; font-size: 14px; color: #333;"></div>
+
+                <div class="property-section">
+                    <button id="clearAllBtn" class="btn btn-secondary" style="width: 100%;">
+                        Clear All Labels
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="label-grid" id="labelGrid">
+                    <div class="margin-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v13"></script>
+</body>
+</html>
